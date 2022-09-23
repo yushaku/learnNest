@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  database:
+    image: postgres:13
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: yushaku
+      POSTGRES_PASSWORD: 123
+      POSRGRES_DB: nest
+    networks: 
+      - defalt
+networks:
+  defalt:
