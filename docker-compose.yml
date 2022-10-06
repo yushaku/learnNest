@@ -2,13 +2,37 @@ version: '3.8'
 services:
   database:
     image: postgres:13
+    container_name: postgres-db
     ports:
       - 5432:5432
+    volumes:
+      - ./.docker/postgres/data:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: yushaku
       POSTGRES_PASSWORD: 123
       POSRGRES_DB: nest
-    networks: 
+    networks:
       - defalt
+
+  minio-server:
+    container_name: minio-server
+    image: minio/minio
+    ports:
+      - "9000:9000"
+    volumes:
+      - ./.docker/minio/data:/data
+    environment:
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+    command: server /data
+
+  minio-client:
+    container_name: minio-client
+    image: minio/mc
+    depends_on:
+      - minio-server
+    entrypoint: >
+      /bin/sh -c " /usr/bin/mc config; /usr/bin/mc config host add myminio http://minio-server:9000 ${MINIO_ACCESS_KEY} ${MINIO_SECRET_KEY}; /usr/bin/mc mb myminio/test-bucket; echo 'my content' > myfile.txt; /usr/bin/mc cp myfile.txt myminio/test-bucket; exit 0; "
+
 networks:
   defalt:
