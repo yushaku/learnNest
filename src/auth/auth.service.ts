@@ -15,7 +15,7 @@ export class AuthService {
     private config: ConfigService,
   ) {}
 
-  async login(authDto: LoginDto) {
+  async login(authDto: LoginDto): Promise<{ jwtToken: string }> {
     const { email, password } = authDto;
 
     const existedUser = await this.prisma.user.findFirst({
