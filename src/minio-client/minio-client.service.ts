@@ -48,6 +48,7 @@ export class MinioClientService {
             HttpStatus.BAD_REQUEST,
           );
         }
+
         console.log(res.etag);
       },
     );
@@ -71,9 +72,12 @@ export class MinioClientService {
   }
 
   async getOne(objetName: string, bucketName = 'yushaku') {
-    const data = await this.minio.client.getObject(bucketName, objetName);
-
-    return data;
+    try {
+      const data = await this.minio.client.getObject(bucketName, objetName);
+      return data.readableFlowing;
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   async getMany(bucketName = 'yushaku') {
