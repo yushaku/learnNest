@@ -11,29 +11,41 @@ datasource db {
 }
 
 model User {
-  id           Int     @id @default(autoincrement())
+  id           Int       @id @default(autoincrement())
   name         String?
-  email        String  @unique()
+  email        String    @unique()
   hashPassword String
-
-  articles Article[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  imageLink    String
+  articles     Article[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  Message      Message[]
 
   @@map("users")
 }
 
 model Article {
-  id          Int    @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   name        String
   description String
-
-  userId Int
-  user   User @relation(fields: [userId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  userId      Int
+  Message     Message[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  user        User      @relation(fields: [userId], references: [id])
 
   @@map("articles")
+}
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  text      String
+  userId    Int
+  articleId Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  article   Article  @relation(fields: [articleId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@map("messages")
 }
