@@ -12,7 +12,25 @@ services:
       POSTGRES_PASSWORD: 123
       POSRGRES_DB: nest
     networks:
-      - defalt
+      - default
+
+  # redis:
+  #   image: 'redis:7.0-alpine'
+  #   volumes:
+  #     - ./.docker/redis:/data
+  #   ports:
+  #     - '6379:6379'
+  #   networks:
+  #     - default
+
+  # redis-commander:
+  #   container_name: redis-commander
+  #   image: rediscommander/redis-commander:latest
+  #   restart: always
+  #   environment:
+  #     - REDIS_HOSTS=local:redis:6379
+  #   ports:
+  #     - '8081:8081'
 
   minio-server:
     container_name: minio-server
@@ -28,4 +46,4 @@ services:
     command: server /data --console-address ":9001"
 
 networks:
-  defalt:
+  default:
