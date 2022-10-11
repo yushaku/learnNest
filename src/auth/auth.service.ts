@@ -49,8 +49,8 @@ export class AuthService {
         },
       });
 
-      delete createdUser.hashPassword;
-      return createdUser;
+      const jwtToken = await this.signToken(createdUser.id, createdUser.email);
+      return { jwtToken };
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
@@ -65,7 +65,7 @@ export class AuthService {
 
   async signToken(userId: number, email: string): Promise<string> {
     const payload = {
-      sub: userId,
+      userId,
       email,
     };
 

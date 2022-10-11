@@ -11,7 +11,7 @@ import { CommonService } from './common.service';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (config: ConfigService) => ({
-        secret: config.get('jwtSecret'),
+        secret: config.get('JWT_SECRET'),
       }),
     }),
   ],
