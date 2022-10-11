@@ -1,5 +1,4 @@
 import { AuthGuard } from './../common/guards/auth.guard';
-import { UserService } from 'src/user/user.service';
 import {
   Controller,
   Delete,
@@ -12,8 +11,9 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { MinioClientService } from 'src/minio-client/minio-client.service';
-import { JwtUser } from 'src/common/decorators';
+import { MinioClientService } from '../minio-client/minio-client.service';
+import { UserService } from './user.service';
+import { JwtUser } from '../common/decorators';
 
 @UseGuards(AuthGuard)
 @Controller('user')
