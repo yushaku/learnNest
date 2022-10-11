@@ -1,15 +1,38 @@
 import { Injectable } from '@nestjs/common';
-import { MinioService } from 'src/minio/minio.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly minioService: MinioService) {}
+  constructor(private prisma: PrismaService) {}
 
   getUserImage() {
-    return this.minioService.getListBucket();
+    return;
   }
 
-  uploadUserImage(file: any, key: string) {
-    return this.minioService.upload(file, key);
+  uploadUserImage(userId: number, url: string) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { imageLink: url },
+      select: {
+        name: true,
+        email: true,
+        imageLink: true,
+      },
+    });
+  }
+
+  getOne(userId: number) {
+    return this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        name: true,
+        email: true,
+        imageLink: true,
+      },
+    });
+  }
+
+  getAll() {
+    return this.prisma.user.findMany();
   }
 }
