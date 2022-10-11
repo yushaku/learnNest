@@ -36,7 +36,7 @@ export class AuthService {
   }
 
   async register(authDto: RegisterDto) {
-    const { email, name, password } = authDto;
+    const { email, name, password, imageLink } = authDto;
 
     const hashPassword = await argon.hash(password);
     try {
@@ -45,6 +45,7 @@ export class AuthService {
           email,
           name,
           hashPassword,
+          imageLink,
         },
       });
 

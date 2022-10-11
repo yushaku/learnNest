@@ -11,6 +11,9 @@ export class RegisterDto {
   @IsNotEmpty()
   @IsString()
   password: string;
+
+  @IsString()
+  imageLink = '';
 }
 
 export class LoginDto {
