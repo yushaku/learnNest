@@ -1,0 +1,37 @@
+version: '3.5'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - ${APP_PORT}:8000
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+    networks:
+      - backend
+
+  postgres:
+    image: postgres:14.9-alpine
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB_MAIN: ${DB_MAIN}
+      POSTGRES_DB_TEST: ${DB_TEST}
+    ports:
+      - ${DB_PORT}:5432
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
+    networks:
+      - backend
+
+networks:
+  backend:
+
+
+volumes:
+  pg_data:
+  node_modules:
