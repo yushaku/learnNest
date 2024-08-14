@@ -5,9 +5,11 @@ import { JwtModule } from '@nestjs/jwt'
 import { TerminusModule } from '@nestjs/terminus'
 import { LoggerModule } from 'nestjs-pino'
 import { AppController } from './app.controller'
+import { AuthModule } from './auth/auth.module'
 import { UserModule } from './user/user.module'
 
 import Joi from 'joi'
+import { ShareModule } from './shared/share.module'
 
 const { NODE_ENV = 'development' } = process.env
 const isProd = NODE_ENV === 'production'
@@ -23,6 +25,9 @@ const isProd = NODE_ENV === 'production'
 
         JWT_SECRET: Joi.string().required(),
         COOKIE_SECRET: Joi.string().required(),
+
+        GOOGLE_CLIENT_ID: Joi.string().required(),
+        GOOGLE_CLIENT_SECRET: Joi.string().required(),
       }),
     }),
     JwtModule.register({
@@ -53,6 +58,8 @@ const isProd = NODE_ENV === 'production'
     }),
     TerminusModule,
     UserModule,
+    AuthModule,
+    ShareModule,
   ],
   controllers: [AppController],
 })
