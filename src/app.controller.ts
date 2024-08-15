@@ -1,14 +1,16 @@
 import { Controller, Get } from '@nestjs/common'
 
-import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger'
-import { HealthCheckService, TypeOrmHealthIndicator } from '@nestjs/terminus'
+import { ApiOperation, ApiTags } from '@nestjs/swagger'
+import { HealthCheckService, PrismaHealthIndicator } from '@nestjs/terminus'
+import { PrismaService } from './prisma.service'
 
 @ApiTags('App')
 @Controller()
 export class AppController {
   constructor(
     private health: HealthCheckService,
-    private db: TypeOrmHealthIndicator,
+    private db: PrismaHealthIndicator,
+    private prisma: PrismaService,
   ) {}
 
   @Get()
@@ -22,11 +24,7 @@ export class AppController {
     summary:
       'A health check is positive if all the assigned health indicators are up and running.',
   })
-  @ApiOkResponse({
-    description:
-      'A health check is positive if all the assigned health indicators are up and running.',
-  })
   healthCheck() {
-    return this.health.check([() => this.db.pingCheck('database')])
+    return this.health.check([() => this.db.pingCheck('database', this.prisma)])
   }
 }

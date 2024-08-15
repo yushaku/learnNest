@@ -10,6 +10,7 @@ import { UserModule } from './user/user.module'
 
 import Joi from 'joi'
 import { ShareModule } from './shared/share.module'
+import { PrismaService } from './prisma.service'
 
 const { NODE_ENV = 'development' } = process.env
 const isProd = NODE_ENV === 'production'
@@ -62,5 +63,6 @@ const isProd = NODE_ENV === 'production'
     ShareModule,
   ],
   controllers: [AppController],
+  providers: [PrismaService],
 })
 export class AppModule {}
