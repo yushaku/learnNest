@@ -1,16 +1,19 @@
 import { BullModule } from '@nestjs/bullmq'
 import { Module } from '@nestjs/common'
-import { ConfigModule } from '@nestjs/config'
-import { JwtModule } from '@nestjs/jwt'
+import { ConfigModule, ConfigService } from '@nestjs/config'
 import { TerminusModule } from '@nestjs/terminus'
+import { ThrottlerModule } from '@nestjs/throttler'
 import { LoggerModule } from 'nestjs-pino'
+import { ThrottlerStorageRedisService } from 'nestjs-throttler-storage-redis'
+
 import { AppController } from './app.controller'
 import { AuthModule } from './auth/auth.module'
+import { PrismaService } from './prisma.service'
+import { ShareModule } from './shared/share.module'
 import { UserModule } from './user/user.module'
 
+import Redis from 'ioredis'
 import Joi from 'joi'
-import { ShareModule } from './shared/share.module'
-import { PrismaService } from './prisma.service'
 
 const { NODE_ENV = 'development' } = process.env
 const isProd = NODE_ENV === 'production'
@@ -21,20 +24,18 @@ const isProd = NODE_ENV === 'production'
       isGlobal: true,
       validationSchema: Joi.object({
         DATABASE_URL: Joi.string().required(),
-        REDIS_HOST: Joi.string().required(),
-        REDIS_PORT: Joi.string().required(),
+        REDIS_HOST: Joi.string().required().default('localhost'),
+        REDIS_PORT: Joi.string().required().default(6379),
 
         JWT_SECRET: Joi.string().required(),
         COOKIE_SECRET: Joi.string().required(),
 
         GOOGLE_CLIENT_ID: Joi.string().required(),
         GOOGLE_CLIENT_SECRET: Joi.string().required(),
+
+        THROTTLE_LIMIT: Joi.number().default(20),
+        THROTTLE_TTL: Joi.number().default(60),
       }),
-    }),
-    JwtModule.register({
-      global: true,
-      secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '1d' },
     }),
     BullModule.forRoot({
       connection: {
@@ -56,6 +57,24 @@ const isProd = NODE_ENV === 'production'
         autoLogging: isProd ? false : false,
         quietReqLogger: true,
       },
+    }),
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (config: ConfigService) => ({
+        throttlers: [
+          {
+            ttl: config.get('THROTTLE_TTL'),
+            limit: config.get('THROTTLE_LIMIT'),
+          },
+        ],
+        storage: new ThrottlerStorageRedisService(
+          new Redis({
+            port: config.get('REDIS_PORT'),
+            host: config.get('REDIS_HOST'),
+          }),
+        ),
+      }),
     }),
     TerminusModule,
     UserModule,

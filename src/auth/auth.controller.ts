@@ -9,12 +9,14 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
+import { ThrottlerGuard } from '@nestjs/throttler'
+import { FastifyReply, FastifyRequest } from 'fastify'
 import { AuthService } from './auth.service'
 import { CreateUserDto, UserDto } from './dto/user.dto'
-import { ConfigService } from '@nestjs/config'
-import { FastifyReply, FastifyRequest } from 'fastify'
 
 @Controller('auth')
+@UseGuards(ThrottlerGuard)
 export class AuthController {
   private isDevelopment: boolean
 
@@ -57,8 +59,9 @@ export class AuthController {
 
   @Post('register')
   async register(@Body() userDto: CreateUserDto) {
-    await this.authService.register(userDto)
-    return { message: 'please confirm your email' }
+    const { access_token } = await this.authService.register(userDto)
+
+    return { message: 'Auth Successfully', access_token }
   }
 
   protected setToken(res: FastifyReply, { access_token, refresh_token }) {

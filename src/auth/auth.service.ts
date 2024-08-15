@@ -35,7 +35,7 @@ export class AuthService {
     })
     if (user) throw new BadRequestException("email's user already existed")
 
-    await this.createAccount(userDto)
+    return this.createAccount(userDto)
   }
 
   async googleAuth(user: CreateUserDto) {
