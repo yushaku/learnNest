@@ -1,13 +1,15 @@
 import { PrismaService } from '@/prisma.service'
 import { JWTService } from '@/shared/jwt.service'
+import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager'
 import {
   BadRequestException,
-  HttpException,
-  HttpStatus,
+  Inject,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common'
 import * as bcrypt from 'bcrypt'
+import { DateTime } from 'luxon'
 import { CreateUserDto, UserDto } from './dto/user.dto'
 
 @Injectable()
@@ -15,13 +17,35 @@ export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwt: JWTService,
+    @Inject(CACHE_MANAGER) private cache: Cache,
   ) {}
 
   async login({ email, password }: UserDto) {
+    const failedjail = await this.getJail(email)
+    console.log(failedjail)
+
+    if (failedjail?.expired > DateTime.now().second) {
+      throw new BadRequestException(
+        'Your account has been locked, please try again later',
+      )
+    }
+
+    if (failedjail?.retry > 5) {
+      throw new BadRequestException(
+        'Your account has been locked, please reset your password',
+      )
+    }
+
     const user = await this.prisma.user.findUnique({ where: { email } })
     if (!user) throw new NotFoundException("User's email does not exist")
 
-    await this.verifyPassword(password, user.password)
+    const isMatching = await bcrypt.compare(password, user.password)
+    if (!isMatching) {
+      await this.setjail(email, failedjail)
+      throw new UnauthorizedException('Wrong credentials')
+    }
+
+    await this.removeJail(email)
     const { access_token, refresh_token } = this.jwt.genToken({
       userId: user.id,
     })
@@ -77,10 +101,49 @@ export class AuthService {
     return { access_token, refresh_token }
   }
 
-  async verifyPassword(rawPass: string, hashedPass: string) {
-    const isMatching = await bcrypt.compare(rawPass, hashedPass)
-    if (!isMatching) {
-      throw new HttpException('Wrong credentials', HttpStatus.BAD_REQUEST)
+  async getJail(email: string) {
+    const failedjail: null | JailUser = await this.cache.get(
+      `jail-user-${email}`,
+    )
+    return failedjail
+  }
+
+  async removeJail(email: string) {
+    await this.cache.del(`jail-user-${email}`)
+  }
+
+  async setjail(email: string, failedjail: null | JailUser) {
+    const time = Number(failedjail?.retry ?? 0) + 1
+    const lockTime = this.lockTime(time)
+    const expired = DateTime.now().plus({ minutes: lockTime }).toSeconds()
+
+    await this.cache.set(
+      `jail-user-${email}`,
+      {
+        retry: time,
+        lock: `${lockTime} mins`,
+        expired,
+      },
+      24 * 60 * 60 * 1000,
+    )
+  }
+
+  lockTime(time: number): number {
+    switch (time) {
+      case 1:
+        return 0
+      case 2:
+        return 0
+      case 3:
+        return 0
+      case 4:
+        return 5
+      case 5:
+        return 15
+      default:
+        return 60
     }
   }
 }
+
+type JailUser = { retry: number; lock: string; expired: number }
