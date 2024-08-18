@@ -1,3 +1,4 @@
+import { TOKEN } from '@/shared/constant'
 import { GoogleOAuthGuard } from '@/shared/guard'
 import {
   Body,
@@ -64,14 +65,21 @@ export class AuthController {
     return { message: 'Auth Successfully', access_token }
   }
 
+  @Post('logout')
+  @HttpCode(200)
+  async logOut(@Res({ passthrough: true }) res: FastifyReply) {
+    res.clearCookie(TOKEN.ACCESS)
+    res.clearCookie(TOKEN.REFRESH)
+  }
+
   protected setToken(res: FastifyReply, { access_token, refresh_token }) {
-    res.cookie('access_token', access_token, {
+    res.cookie(TOKEN.ACCESS, access_token, {
       httpOnly: true,
       sameSite: this.isDevelopment ? 'lax' : 'strict',
       secure: this.isDevelopment ? false : true,
       path: '/',
     })
-    res.cookie('refresh_token', refresh_token, {
+    res.cookie(TOKEN.REFRESH, refresh_token, {
       httpOnly: true,
       sameSite: this.isDevelopment ? 'lax' : 'strict',
       secure: this.isDevelopment ? false : true,

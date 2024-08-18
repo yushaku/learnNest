@@ -4,6 +4,11 @@ export enum QUEUE_LIST {
   USER = 'USER',
 }
 
+export enum TOKEN {
+  REFRESH = 'refresh_token',
+  ACCESS = 'access_token',
+}
+
 export const HttpCodeMessages = {
   200: 'OK',
   201: 'Created',

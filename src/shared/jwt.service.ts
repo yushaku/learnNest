@@ -15,6 +15,8 @@ export type Invitetoken = {
 
 @Injectable({ scope: Scope.REQUEST })
 export class JWTService {
+  isDevelopment = true
+
   ACCESS_SECRET: string
   EXPIRED_TIME: string
   REFRESH_SECRET: string
@@ -22,14 +24,15 @@ export class JWTService {
 
   constructor(
     private jwtService: JwtService,
-    private configService: ConfigService,
+    private config: ConfigService,
   ) {
-    this.ACCESS_SECRET = this.configService.get('JWT_SECRET')
-    this.EXPIRED_TIME = this.configService.get('JWT_EXPIRED_TIME')
-    this.REFRESH_SECRET = this.configService.get('JWT_REFRESH_SECRET')
-    this.REFRESH_EXPIRED_TIME = this.configService.get(
-      'JWT_REFRESH_EXPIRED_TIME',
-    )
+    this.isDevelopment =
+      this.config.get('NODE_ENV') === 'development' ? true : false
+
+    this.ACCESS_SECRET = this.config.get('JWT_SECRET')
+    this.EXPIRED_TIME = this.config.get('JWT_EXPIRED_TIME')
+    this.REFRESH_SECRET = this.config.get('JWT_REFRESH_SECRET')
+    this.REFRESH_EXPIRED_TIME = this.config.get('JWT_REFRESH_EXPIRED_TIME')
   }
 
   public createAccessToken(payload: TokenPayload) {
@@ -52,15 +55,25 @@ export class JWTService {
       refresh_token: this.createRefreshToken(payload),
     }
   }
+  public async validateToken(token: string) {
+    try {
+      const user = await this.jwtService.verify(token, {
+        secret: this.ACCESS_SECRET,
+      })
+      return user
+    } catch (error) {
+      return null
+    }
+  }
 
-  public async veryfyReFreshToken(refresh_token: string) {
+  public async refreshToken(refresh_token: string) {
     const payload: TokenPayload = await this.jwtService.verifyAsync(
       refresh_token,
       {
-        secret: this.ACCESS_SECRET,
+        secret: this.REFRESH_SECRET,
       },
     )
-    return this.createAccessToken(payload)
+    return this.createAccessToken({ userId: payload.userId })
   }
 
   public emailToken(payload: Invitetoken) {
@@ -75,5 +88,14 @@ export class JWTService {
       secret: this.ACCESS_SECRET,
     })
     return payload as Invitetoken
+  }
+
+  option() {
+    return {
+      httpOnly: true,
+      sameSite: this.isDevelopment ? 'lax' : 'strict',
+      secure: this.isDevelopment ? false : true,
+      path: '/',
+    }
   }
 }

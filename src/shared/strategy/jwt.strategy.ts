@@ -3,10 +3,15 @@ import { PassportStrategy } from '@nestjs/passport'
 import { FastifyRequest } from 'fastify'
 import { ExtractJwt, Strategy } from 'passport-jwt'
 
+type JwtPayload = {
+  userId: string
+}
+
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor() {
     super({
+      secretOrKey: process.env.JWT_SECRET,
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request: FastifyRequest) => {
           const authorization = request.headers.authorization || ''
@@ -18,7 +23,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
           return access_token
         },
       ]),
-      secretOrKey: process.env.JWT_SECRET,
     })
+  }
+
+  async validate(data: JwtPayload) {
+    return data
   }
 }
