@@ -1,4 +1,7 @@
 import { BullModule } from '@nestjs/bullmq'
+import { CacheModule } from '@nestjs/cache-manager'
+import { redisStore } from 'cache-manager-ioredis-yet'
+
 import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { TerminusModule } from '@nestjs/terminus'
@@ -74,6 +77,18 @@ const isProd = NODE_ENV === 'production'
             host: config.get('REDIS_HOST'),
           }),
         ),
+      }),
+    }),
+    CacheModule.registerAsync({
+      isGlobal: true,
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (config: ConfigService) => ({
+        store: redisStore,
+        redisInstance: new Redis({
+          host: config.get('REDIS_HOST'),
+          port: config.get('REDIS_PORT'),
+        }),
       }),
     }),
     TerminusModule,
