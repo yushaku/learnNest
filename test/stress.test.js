@@ -4,8 +4,8 @@ import { Counter } from 'k6/metrics'
 
 export const failedRequests = new Counter('failed_requests')
 
-const BASE_URL = 'https://dev.api.anonymaus.fyi'
-//
+const BASE_URL = 'http://app:8080'
+
 //NOTE: Number of virtual users
 let target_vus = 50
 target_vus = 200

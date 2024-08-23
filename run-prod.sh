@@ -1,3 +1,3 @@
 #!/bin/bash
-yarn db:up
-yarn start:prod
+pnpm db:up
+pnpm start:prod

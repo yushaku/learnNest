@@ -1,3 +1,3 @@
 #!/bin/bash
-yarn db:up
-yarn dev
+pnpm db:up
+pnpm dev

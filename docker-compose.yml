@@ -2,19 +2,49 @@ version: '3.5'
 
 services:
   app:
+    container_name: app
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - ${APP_PORT}:8000
+      - ${APP_PORT}:${APP_PORT}
     volumes:
       - .:/app
       - node_modules:/app/node_modules
     networks:
       - backend
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 3.75g
+        reservations:
+          cpus: '1.0' # Reserve 1 CPU
+          memory: 62G # Reserve 62 GB of RAM
+
+  redis:
+    image: redis:7.0-alpine
+    container_name: redis
+    ports:
+      - ${REDIS_PORT:-6379}:6379
+    networks:
+      - backend
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: redis-commander
+    restart: unless-stopped
+    environment:
+      - REDIS_HOSTS=redis
+    ports:
+      - ${REDIS_COMMAND_PORT:-8081}:8081
+    networks:
+      - backend
 
   postgres:
-    image: postgres:14.9-alpine
+    image: postgres:16.2
+    container_name: postgres
+    restart: unless-stopped
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASS}
