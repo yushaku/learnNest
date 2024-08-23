@@ -13,7 +13,7 @@
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "db:up": "pnpm prisma db push",
-    "db:seed": "pnpm prisma db seed",
+    "db:seed": "ts-node prisma/seed.ts",
     "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@elastic/elasticsearch": "7.17.14",
+    "@faker-js/faker": "^8.4.1",
     "@fastify/cookie": "^9.1.0",
     "@fastify/static": "^6.11.2",
     "@nestjs-modules/mailer": "^2.0.2",
