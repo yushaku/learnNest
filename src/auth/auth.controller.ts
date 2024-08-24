@@ -6,6 +6,7 @@ import {
   Get,
   HttpCode,
   Post,
+  Query,
   Req,
   Res,
   UseGuards,
@@ -56,13 +57,15 @@ export class AuthController {
   ) {
     const token = await this.authService.login(userDto)
     this.setToken(res, token)
+    res
+      .status(200)
+      .send({ message: 'Auth Successfully', access_token: token.access_token })
   }
 
   @Post('register')
   async register(@Body() userDto: CreateUserDto) {
-    const { access_token } = await this.authService.register(userDto)
-
-    return { message: 'Auth Successfully', access_token }
+    await this.authService.register(userDto)
+    return { message: 'please confirm your email' }
   }
 
   @Post('logout')
@@ -70,6 +73,16 @@ export class AuthController {
   async logOut(@Res({ passthrough: true }) res: FastifyReply) {
     res.clearCookie(TOKEN.ACCESS)
     res.clearCookie(TOKEN.REFRESH)
+  }
+
+  @Get('verify')
+  async verifyEmail(
+    @Query('token') token: string,
+    @Res({ passthrough: true }) res: FastifyReply,
+  ) {
+    const tk = await this.authService.verifyEmail(token)
+    this.setToken(res, tk)
+    res.redirect(process.env.CLIENT_URL ?? 'http://localhost:3000/', 301)
   }
 
   protected setToken(res: FastifyReply, { access_token, refresh_token }) {
@@ -85,6 +98,5 @@ export class AuthController {
       secure: this.isDevelopment ? false : true,
       path: '/',
     })
-    res.status(200).send({ message: 'Auth Successfully', access_token })
   }
 }

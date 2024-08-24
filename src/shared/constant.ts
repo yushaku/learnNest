@@ -1,7 +1,7 @@
 import 'dotenv/config'
 
 export enum QUEUE_LIST {
-  USER = 'USER',
+  AUTH = 'AUTH',
 }
 
 export enum TOKEN {

@@ -7,7 +7,6 @@ type TokenPayload = {
 }
 
 export type Invitetoken = {
-  team_id?: string
   email: string
   password: string
   name?: string

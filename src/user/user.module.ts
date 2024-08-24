@@ -1,19 +1,12 @@
+import { PrismaService } from '@/prisma.service'
 import { Module } from '@nestjs/common'
+import { ScheduleModule } from '@nestjs/schedule'
 import { UserController } from './user.controller'
 import { UserService } from './user.service'
-import { ScheduleModule } from '@nestjs/schedule'
-import { UserCronService } from './user.cron'
-import { UserConsumer } from './user.consumer'
-import { BullModule } from '@nestjs/bullmq'
-import { QUEUE_LIST } from '@/shared/constant'
-import { PrismaService } from '@/prisma.service'
 
 @Module({
-  imports: [
-    ScheduleModule.forRoot(),
-    BullModule.registerQueue({ name: QUEUE_LIST.USER }),
-  ],
+  imports: [ScheduleModule.forRoot()],
   controllers: [UserController],
-  providers: [UserService, UserCronService, UserConsumer, PrismaService],
+  providers: [UserService, PrismaService],
 })
 export class UserModule {}
