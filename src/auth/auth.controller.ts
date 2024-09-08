@@ -16,7 +16,9 @@ import { ThrottlerGuard } from '@nestjs/throttler'
 import { FastifyReply, FastifyRequest } from 'fastify'
 import { AuthService } from './auth.service'
 import { CreateUserDto, UserDto } from './dto/user.dto'
+import { ApiTags } from '@nestjs/swagger'
 
+@ApiTags('Authentication')
 @Controller('auth')
 @UseGuards(ThrottlerGuard)
 export class AuthController {

@@ -40,15 +40,19 @@ const isProd = NODE_ENV === 'production'
         THROTTLE_TTL: Joi.number().default(60),
       }),
     }),
-    BullModule.forRoot({
-      connection: {
-        host: process.env.REDIS_HOST,
-        port: Number(process.env.REDIS_PORT),
-      },
-      defaultJobOptions: {
-        attempts: 3,
-        removeOnComplete: true,
-      },
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (config: ConfigService) => ({
+        connection: {
+          host: config.get('REDIS_HOST'),
+          port: config.get('REDIS_PORT'),
+        },
+        defaultJobOptions: {
+          attempts: 3,
+          removeOnComplete: true,
+        },
+      }),
     }),
     LoggerModule.forRoot({
       pinoHttp: {
