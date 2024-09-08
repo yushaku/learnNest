@@ -1,6 +1,6 @@
-## Description
+# Description
 
-Project use [Nest](https://github.com/nestjs/nest) 10 framework TypeScript 
+Project use [Nest](https://github.com/nestjs/nest) 10 framework TypeScript
 
 ## Requirements
 
@@ -9,29 +9,25 @@ Project use [Nest](https://github.com/nestjs/nest) 10 framework TypeScript
 
 ## Development
 
-Migrate database and running the app 
+Migrate database and running the app
 
 ```bash
-$ cp .env.dev .env
-$ docker-compose up
+cp .env.dev .env
+docker-compose up
 ```
+
+- the OVERHEAD of this app.
+  Using k6 test with 1000 v_users call API `http://app`
+
+| test      | https time | RPS          | min    | max      | p95   | cpu  |
+| --------- | ---------- | ------------ | ------ | -------- | ----- | ---- |
+| get empty | 13.84 ms   | 2118 times/s | 0.15ms | 520.27ms | 55.87 | 113% |
 
 ## Deploy
-Prepare Database and update .env file
 
 ```bash
-$ cp .env.prod .env
-```
-
-Build app
-
-```bash
-$ yarn
-$ yarn build
-```
-
-Migrate database and running the app 
-
-```bash
-$ ./run-prod.sh
+cp .env.prod .env
+yarn
+yarn build
+./run-prod.sh
 ```

@@ -13,10 +13,9 @@ target_vus = 1000
 
 export let options = {
   stages: [
-    { duration: '10s', target: 10 },
-    { duration: '10s', target: 100 },
+    { duration: '30s', target: target_vus },
     {
-      duration: '60s',
+      duration: '30s',
       target: target_vus,
       thresholds: {
         http_req_duration: ['p(95)<2000'], // 95% of requests must complete below 2000ms
