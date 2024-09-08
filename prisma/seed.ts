@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client'
+import * as bcrypt from 'bcrypt'
 import { faker } from '@faker-js/faker'
 const prisma = new PrismaClient()
 
@@ -6,12 +7,21 @@ async function main() {
   await prisma.post.deleteMany()
   await prisma.user.deleteMany()
 
-  const userList = new Array(100).fill(null).map(() => ({
+  const hash = await bcrypt.hash('ssdakhf123@-dsf=@12', 10)
+  const userList = new Array(100).fill(null).map(() => {
+    return {
+      id: faker.string.uuid(),
+      email: faker.internet.email(),
+      name: faker.person.fullName(),
+      password: hash,
+    }
+  })
+  userList.unshift({
     id: faker.string.uuid(),
-    email: faker.internet.email(),
-    name: faker.person.fullName(),
-    password: faker.internet.password(),
-  }))
+    email: 'levanson@gmail.com',
+    name: 'levanson',
+    password: hash,
+  })
 
   await prisma.user.createMany({
     data: userList,

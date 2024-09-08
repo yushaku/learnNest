@@ -1,15 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsOptional, IsString } from 'class-validator'
-
-export class Pagination {
-  @ApiProperty()
-  @IsOptional()
-  page: number = 1
-
-  @ApiProperty()
-  @IsOptional()
-  perPage: number = 20
-}
+import { IsString } from 'class-validator'
 
 export class LoginDTO {
   @ApiProperty({ required: true })
