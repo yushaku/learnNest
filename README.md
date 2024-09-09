@@ -23,6 +23,9 @@ Migrate database and running the app
 ```bash
 cp .env.dev .env
 docker-compose up
+
+# config host for testing scale app on localhost
+echo "127.0.1.1 test-domain.local" | sudo tee -a /etc/hosts
 ```
 
 ## test

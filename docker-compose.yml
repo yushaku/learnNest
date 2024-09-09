@@ -8,11 +8,17 @@ services:
       dockerfile: Dockerfile
     ports:
       - ${APP_PORT}:${APP_PORT}
+    expose:
+      - '8080'
     volumes:
       - .:/app
       - node_modules:/app/node_modules
     networks:
       - backend
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.app.rule=Host(`test-domain.local`)'
+      - 'traefik.http.services.app.loadbalancer.server.port=3000'
     deploy:
       replicas: 1
       resources:
@@ -21,6 +27,21 @@ services:
           memory: 3.75g
     environment:
       - REDIS_HOST=redis
+
+  traefik:
+    image: traefik:v2.10
+    container_name: traefik
+    command:
+      - '--api.insecure=true'
+      - '--providers.docker=true'
+      - '--entrypoints.web.address=:80'
+    ports:
+      - '80:80'
+      - '8888:8080'
+    volumes:
+      - '/var/run/docker.sock:/var/run/docker.sock'
+    networks:
+      - backend
 
   redis:
     image: redis:7.0-alpine
